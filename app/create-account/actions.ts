@@ -1,5 +1,10 @@
 "use server";
 
+import {
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_REGEX,
+  PASSWORD_REGEX_ERROR,
+} from "@/lib/constants";
 import { z } from "zod";
 
 const passwordRegex = new RegExp(
@@ -20,20 +25,15 @@ const formSchema = z
       .string({
         invalid_type_error: "User name must be a string!",
       })
-      .min(3, "too short")
-      .max(10, "too long")
       .toLowerCase()
       .trim()
       .refine(checkUsername, "Np potatos allowed!"),
     email: z.string().email().toLowerCase(),
     password: z
       .string()
-      .min(10)
-      .regex(
-        passwordRegex,
-        "A password must have a-z A-Z number special character"
-      ),
-    confirm_password: z.string().min(10),
+      .min(PASSWORD_MIN_LENGTH)
+      .regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
+    confirm_password: z.string().min(PASSWORD_MIN_LENGTH),
   })
   .refine(checkPasswords, {
     message: "Both passwords should be the same",
@@ -49,7 +49,10 @@ export async function createAccount(prevState: any, formData: FormData) {
   };
   const result = formSchema.safeParse(data);
   if (!result.success) {
-    return result.error.flatten();
+    return {
+      fieldErrors: result.error.flatten().fieldErrors,
+      errors: [],
+    };
   } else {
     console.log(result.data);
   }
