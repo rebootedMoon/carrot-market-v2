@@ -2,6 +2,9 @@
 
 import { z } from "zod";
 
+const passwordRegex = new RegExp(
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*?[#?!@$%^&*-]).+$/
+);
 const checkUsername = (username: string) => !username.includes("potato");
 const checkPasswords = ({
   password,
@@ -19,9 +22,17 @@ const formSchema = z
       })
       .min(3, "too short")
       .max(10, "too long")
+      .toLowerCase()
+      .trim()
       .refine(checkUsername, "Np potatos allowed!"),
-    email: z.string().email(),
-    password: z.string().min(10),
+    email: z.string().email().toLowerCase(),
+    password: z
+      .string()
+      .min(10)
+      .regex(
+        passwordRegex,
+        "A password must have a-z A-Z number special character"
+      ),
     confirm_password: z.string().min(10),
   })
   .refine(checkPasswords, {
@@ -37,6 +48,9 @@ export async function createAccount(prevState: any, formData: FormData) {
     confirm_password: formData.get("confirm_password"),
   };
   const result = formSchema.safeParse(data);
-  console.log(result);
-  if (!result.success) return result.error.flatten();
+  if (!result.success) {
+    return result.error.flatten();
+  } else {
+    console.log(result.data);
+  }
 }
