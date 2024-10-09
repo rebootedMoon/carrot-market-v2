@@ -11,10 +11,7 @@ const phoneSchema = z
     (phone) => validator.isMobilePhone(phone, "ko-KR"),
     "Wrong phone format"
   );
-const tokenSchma = z.coerce
-  .number()
-  .min(100000)
-  .max(999999);
+const tokenSchma = z.coerce.number().min(100000).max(999999);
 
 interface ActionState {
   token: boolean;
