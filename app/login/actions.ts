@@ -55,6 +55,7 @@ export async function login(prevState: any, formData: FormData) {
         email: result.data.email,
       },
       select: {
+        id: true,
         password: true,
       },
     });
