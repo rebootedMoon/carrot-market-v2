@@ -9,6 +9,8 @@ const publicOnlyUrls: Routes = {
   "/login": true,
   "/sms": true,
   "/create-account": true,
+  "/github/start": true,
+  "/github/complete": true,
 };
 export async function middleware(request: NextRequest) {
   const session = await getSession();
@@ -27,5 +29,5 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   // matcher: ["/", "/profile", "/create-account", "/user/:path*" ],
-  matcher: ["/((?!api|_next/static| _next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static| _next/image|favicon.ico).*)"],
 };
