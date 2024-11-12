@@ -1,11 +1,14 @@
 "use server";
 
+import twilio from "twilio";
 import crypto from "crypto";
 import { z } from "zod";
 import validator from "validator";
 import { redirect } from "next/navigation";
 import db from "@/lib/db";
 import getSession from "@/lib/session";
+import { Vonage } from "@vonage/server-sdk";
+import { Auth } from "@vonage/auth";
 
 const phoneSchema = z
   .string()
@@ -91,6 +94,29 @@ export async function smsLogin(
             },
           },
         },
+      });
+      /*
+      const client = twilio(
+        process.env.TWILIO_ACCOUNT_SID,
+        process.env.TWILIO_AUTH_TOKEN
+      );
+      await client.messages.create({
+        body: ` Your Karrot verification code is ${token}`,
+        from: process.env.TWILIO_PHONE_NUMBER!,
+        to: process.env.MY_PHONE_NUMBER!,
+        // to:result.data
+      });
+      */
+      const client = new Auth({
+        apiKey: process.env.VONAGE_API_KEY,
+        apiSecret: process.env.VONAGE_API_SECRET,
+      });
+
+      const vonage = new Vonage(client);
+      await vonage.sms.send({
+        to: process.env.MY_PHONE_NUMBER!,
+        from: "Vonage APIs",
+        text: `Your Karrot verification code is ${token}`,
       });
       return {
         token: true,
