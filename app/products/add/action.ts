@@ -23,21 +23,14 @@ const productSchema = z.object({
   }),
 });
 
-export async function uploadProduct(formData: FormData) {
+export async function uploadProduct(_: any, formData: FormData) {
   const data = {
     photo: formData.get("photo"),
     title: formData.get("title"),
     price: formData.get("price"),
     description: formData.get("description"),
   };
-  if (data.photo instanceof File) {
-    const photoData = await data.photo.arrayBuffer();
-    await fs.appendFile(
-      `./public/${data.photo.name}`,
-      Buffer.from(photoData)
-    );
-    data.photo = `/${data.photo.name}`;
-  }
+
   const results = productSchema.safeParse(data);
   if (!results.success) {
     return results.error.flatten();
@@ -63,4 +56,19 @@ export async function uploadProduct(formData: FormData) {
       redirect(`/products/${product.id}`);
     }
   }
+}
+
+export async function getUploadUrl() {
+  const response = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/images/v2/direct_upload`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.CLOUDFLARE_API_KEY}`,
+      },
+    }
+  );
+  const data = await response.json();
+  console.log(data);
+  return data;
 }
